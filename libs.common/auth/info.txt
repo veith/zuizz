@@ -1,0 +1,8 @@
+Auth mechanismen gehören hier rein und werden in /zuizz/config/main.config.ini in der section system paragraph auth_mechanism definiert.
+Auch wenn es sich um externe mechanismen handeln sollte gehören sie hier rein, ev. mit referenz auf ../libs.external/.... 
+
+Zur Anmeldung wird ein Request auf usr und einer auf pwd abgefragt. 
+Nach erfolgreicher authentifizierung (über welchen mechanismus auch immer) ist $_SESSION ['ZUIZZ'] ['AUTH'] ['is_auth'] = TRUE;
+
+Für den Login wird ein Object ZUAUTH erstellt und die Methode login() aufgerufen.
+ usr und pwd müssen aus dem Request oder sonst wie selbst geholt werden und ist sache der Klasse. 

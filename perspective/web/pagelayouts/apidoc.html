@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="{$smarty.session.ZUIZZ.LANG.interface_lang}">
+<head>
+    <meta charset="utf-8">
+    <!-- [head:tags] -->
+    <!-- [head:metatags] -->
+    <!-- [head:css] -->
+    <title><!-- [head:title] --></title>
+
+    <!-- Le styles -->
+    <link type="text/css" href="/css/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
+    <link type="text/css" href="/css/bootstrap.css" rel="stylesheet">
+</head>
+
+<body>
+<div class="navbar navbar-fixed">
+    <div class="navbar-inner">
+        <div class="container">
+            <a class="brand" href="/">ZUIZZ Apidoc</a>
+            <!-- [zone:navbar] -->
+
+        </div>
+    </div>
+</div>
+
+
+<div class="container login">
+
+    <div class="row">
+        <div class="span4">
+            <!-- [zone:topsidebar] -->
+        </div>
+        <div class="span8">
+            <!-- [zone:topdefault] -->
+        </div>
+    </div>
+    <div class="row">
+        <div class="span4">
+            <!-- [zone:sidebar] -->
+        </div>
+        <div class="span8">
+            <!-- [zone:default] -->
+        </div>
+    </div>
+</div>
+
+
+
+</div>
+</div>
+
+<div class="bottombar" id="zu_bottompane">
+
+    <div class="container">
+        <div id="zu_activitybar">
+
+            <!-- [zone:activity] -->
+        </div>
+        <div id="zu_statusbar">&copy; Thenerdsnextdoor 2012<!-- [zone:status] --></div>
+        <div id="zu_alert"><!-- [zone:alert] --></div>
+    </div>
+
+</div>
+
+<script src="/jslibs/jquery-1.7.1.js"></script>
+<script src="/jslibs/ui/jquery-ui-1.8.18.custom.js"></script>
+<script src="/jslibs/libraries/jquery.address-1.4.min.js"></script>
+<script src="/jslibs/jquery.hoverIntent.min.js"></script>
+<script src="/jslibs/plugins/twitter/bootstrap-dropdown.js"></script>
+<script src="/jslibs/plugins/twitter/bootstrap-alert.js"></script>
+<script src="/jslibs/plugins/twitter/bootstrap-tab.js"></script>
+<script src="/jslibs/plugins/twitter/bootstrap-collapse.js"></script>
+<script src="/jslibs/plugins/twitter/bootstrap-modal.js"></script>
+<script src="/jslibs/plugins/twitter/bootstrap-typeahead.js"></script>
+
+<script src="/jslibs/utils/traits.zuizz.js"></script>
+
+<script src="/jslibs/libraries/handlebars.js"></script>
+<script src="/jslibs/libraries/select2.min.js"></script>
+<script src="/jslibs/libraries/jquery.handelbars.js"></script>
+<script src="/jslibs/terrific-2.0.0.min.js"></script>
+
+<!-- [head:js] -->
+
+
+<!-- Terri -->
+<script type="text/javascript">
+
+    (function($) {
+        // Tc2
+        $(document).ready(function() {
+            var $page = $('body'),
+                    config = {
+                        dependencyPath: {
+                            library: '/jslibs/libraries/',
+                            plugin: '/jslibs/plugins/',
+                            util: '/jslibs/utils/'
+                        }
+                    },
+                    application = new Tc.Application($page, config);
+
+            application.registerModules();
+            application.start();
+
+        });
+    })(Tc.$);
+</script>
+</body>
+</html>
