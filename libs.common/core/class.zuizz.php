@@ -128,9 +128,10 @@ class ZUIZZ {
 		$rest = implode ( "/", array_slice ( $feature_array, 3 ) );
 
 		// erstelle object für feature wenn nicht vorhanden
-		if (! isset ( $this->feature [$feature] )) {
+		//if (! isset ( $this->feature [$feature] )) {
 			$this->init_feature ( $feature , 'rest');
-		}
+		//}
+
 		// method ausführen  ausgeben
 		if ($rest != "") {
 			return $this->feature [$feature]->process_rest ( $rest, $parameter );
