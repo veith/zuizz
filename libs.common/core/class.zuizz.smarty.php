@@ -1,23 +1,22 @@
 <?php
 /**
- * Smarty implementierung von ZU
+ * Smarty Implementierung von Zuizz
  * @author vzaech
  *
  */
 
 class ZUsmarty extends Smarty {
-	var $theme,$compile_dir,$cache_dir,$trusted_dir,$left_delimeter,$right_delimeter;
+	var $theme,$trusted_dir,$left_delimeter,$right_delimeter;
 	/**
 	 *
 	 */
 	function __construct() {
-        
 		parent::__construct();
-		$this->compile_dir = ZU_DIR_DATA . 'temp/net.smarty.compile';
-		$this->trusted_dir [0] = ZU_DIR_FEATURE;
+		$this->setCompileDir(ZU_DIR_DATA . 'temp/net.smarty.compile');
+        $this->setCacheDir(ZU_DIR_DATA . 'cache/net.smarty.cache');
+        $this->trusted_dir [0] = ZU_DIR_FEATURE;
 		$this->left_delimiter = '{';
 		$this->right_delimiter = '}';
-
 	}
 
 	// parse page

@@ -12,7 +12,7 @@ $GLOBALS['ZUIZZHEADERCODES'] = array(
 
     200 => "Ok",
     201 => "Created",
-    202 => "Acepted",
+    202 => "Accepted",
     203 => "Non-Authoritative Information",
     204 => "No Content",
 
@@ -29,6 +29,7 @@ $GLOBALS['ZUIZZHEADERCODES'] = array(
     403 => "Forbidden",
     404 => "Not Found",
     405 => "Method Not Allowed",
+    418 => "I'm a teapot",
     422 => "Unprocessable Entity",
 
     500 => "Internal Server Error",
