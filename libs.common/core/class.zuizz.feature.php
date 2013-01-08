@@ -5,7 +5,7 @@ class ZUFEATURE
     public $feature_id = null;
     public $feature = null;
     //private $_node_perms = array();
-    private $methodhandler = NULL;
+
     public $permissionset = array();
     public $parameter = array(); // parameter des aktuellen views
     public $identifier; // REST identifier
@@ -266,145 +266,7 @@ class ZUFEATURE
         }
     }
 
-    function process_method_stack()
-    {
-        // methoden ausführen
-        if (isset ($this->values ['method'])) {
-            if (!is_array($this->values ['method'])) {
-                // einzelne methode aufrufen
 
-
-                $this->execute_method($this->values ['method']);
-            } else {
-                // mehrere methoden nach key sortiert aufrufen
-                ksort($this->values ['method']);
-                foreach ($this->values ['method'] as $method) {
-                    // methode aufrufen
-                    $this->execute_method($method);
-                }
-
-            }
-        }
-    }
-
-    /**
-     * Methoden eines features auf rechte prüfen und ggf. ausführen
-     *
-     * @param string $method Name der auszuführenden Methode
-     *                       returns void;
-     */
-    function execute_method($method)
-    {
-        // verhindere das Methoden aus anderen Orten geholt wird
-        $method = basename($method);
-
-        // rechte prüfen
-        if (!isset ($this->config ['model'] ['type'])) {
-            $this->config ['model'] ['type'] = 2;
-        }
-        switch ($this->config ['model'] ['type']) {
-            //Ein Feature das nur Nodes kennt.
-            case 0 :
-                if (isset ($this->config ['tree'] ['identifier'])) {
-                    $node = $this->values [$this->config ['tree'] ['identifier']];
-                } else {
-                    $node = 0;
-                }
-                break;
-            //Ein Feature das Nodes und Ids, Items kennt.
-            case 1 :
-                // node mit zuweisungstabelle auflösen
-                $use_item = false;
-                foreach ($this->config ['model'] ['item'] as $key => $value) {
-                    // wenn ein parameter existiert; verwenden
-                    if (isset ($this->values [$key])) {
-                        $table              = ZU_DB_PREFIX . $value;
-                        $item ['fieldname'] = $key;
-                        $item ['value']     = $this->values [$key];
-                        $use_item           = true;
-                        break;
-                    }
-                }
-                if ($use_item) {
-                    try {
-                        $query = ZUDB::prepare_query("SELECT {$this->config['tree']['identifier']} FROM {$table} WHERE {$item['fieldname']}=:intval Limit 1");
-                        $query->bindParam(':intval', $item ['value'], PDO::PARAM_INT);
-                        $res  = $query->execute()->fetchAll(PDO::FETCH_NUM);
-                        $node = $res [0] [0];
-                    } catch (PDOException $e) {
-                        ZU::log($e . addslashes($query), E_RECOVERABLE_ERROR);
-                    }
-                } else {
-                    // wenn ein node statt eines items durchgegeben wird
-                    if (isset ($this->config ['tree'] ['identifier'])) {
-                        $node = $this->values [$this->config ['tree'] ['identifier']];
-                    } else {
-                        $node = 0;
-                    }
-                }
-                break;
-            //Ein Feature das keine Nodes kennt (nur Node 0) und nur aus Ids, Items besteht.
-            case 2 :
-                $node = 0;
-                break;
-        }
-
-        if (isset ($this->permissionset [$method]) && ZU::check_permission($this->feature_id, $node, $this->permissionset [$method]) && is_file("{$this->basedir}methods/{$method}.php")) {
-            $this->methodhandler = NULL;
-
-            // methoden ermitteln und in pre, custom, post aufsplitten
-            $methoden = array('post'   => array(),
-                              'pre'    => array(),
-                              'custom' => array());
-            foreach (glob("{$this->basedir}methods/{$method}*.php") as $found_method) {
-                if (substr($found_method, -8) == ".pre.php") {
-                    $methoden ['pre'] [] = $found_method;
-                } elseif (substr($found_method, -9) == ".post.php") {
-                    $methoden ['post'] [] = $found_method;
-                } elseif (substr($found_method, -11) == ".custom.php") {
-                    $methoden ['custom'] [] = $found_method;
-                }
-            }
-            // alle pre methods ausführen
-            if ($this->methodhandler != ZU_STOP) {
-                asort($methoden ['pre']);
-                foreach ($methoden ['pre'] as $methode_to_execute) {
-                    if ($this->methodhandler != ZU_STOP) {
-                        include $methode_to_execute;
-                    }
-                }
-            }
-            // custom method
-            if ($this->methodhandler != ZU_STOP && $this->methodhandler != ZU_NOACTION && $this->methodhandler != ZU_NOCUSTOM) {
-                asort($methoden ['custom']);
-                foreach ($methoden ['custom'] as $methode_to_execute) {
-                    if ($this->methodhandler != ZU_STOP && $this->methodhandler != ZU_NOACTION && $this->methodhandler != ZU_NOCUSTOM) {
-                        include $methode_to_execute;
-                    }
-                }
-            }
-            // method selbst ausführen
-            if ($this->methodhandler != ZU_STOP && $this->methodhandler != ZU_NOACTION) {
-                include ("{$this->basedir}/methods/{$method}.php");
-            }
-            // alle post method ausführen
-            if ($this->methodhandler != ZU_STOP && $this->methodhandler != ZU_NOPOST) {
-                asort($methoden ['post']);
-                foreach ($methoden ['post'] as $methode_to_execute) {
-                    if ($this->methodhandler != ZU_STOP && $this->methodhandler != ZU_NOPOST) {
-                        include $methode_to_execute;
-                    }
-                }
-            }
-            // Methode ZU_STOP bei ZU_STOP flag
-            if ($this->methodhandler == ZU_STOP) {
-                if (is_file("{$this->basedir}/methods/{$method}.ZU_STOP.php")) {
-                    include ("{$this->basedir}/methods/{$method}.ZU_STOP.php");
-                }
-            }
-
-        }
-    }
 
     /**
      * SKIN Template Fetchen

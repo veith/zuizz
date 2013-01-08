@@ -179,7 +179,7 @@ class ZUIZZ {
 	// feature initialisieren ohne einen View aufzurufen
 	public function init_feature($feature, $mode=false) {
 		$this->feature [$feature] = new ZUFEATURE ( $feature,$mode );
-		$this->feature [$feature]->process_method_stack ();
+
 	}
 
 	function __destruct() {
