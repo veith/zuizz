@@ -44,7 +44,7 @@ class ZUFEATURE
             $GLOBALS ['ZU_FEATURE'] ['DEFAULTS'] ['date_format'] = $GLOBALS ['ZUIZZ']->config->locale ['smarty_date_format'];
             $GLOBALS ['ZU_FEATURE'] ['SESSION']                  = & $_SESSION ['ZUIZZ'];
 
-            // Daten werden aus dem model hier hin gebunden $GLOBALS ['ZU_FEATURE'] ['DATA']
+
         }
 
         $this->feature = $feature;
@@ -90,8 +90,8 @@ class ZUFEATURE
             $_SESSION ['ZUIZZ'] ['FEATURES'] [$this->feature_id] ['name'] = $feature;
             if (isset ($this->config ['model'] ['model'])) {
                 $_SESSION ['ZUIZZ'] ['FEATURES'] [$this->feature_id] ['model'] = $this->config ['model'] ['model'];
+                $_SESSION ['ZUIZZ'] ['FEATURES'] [$this->feature_id] ['model_type'] = $this->config ['model'] ['type'];
             }
-            $_SESSION ['ZUIZZ'] ['FEATURES'] [$this->feature_id] ['model_type'] = $this->config ['model'] ['type'];
 
             if (isset ($this->config ['tree'] ['enabled']) && $this->config ['tree'] ['enabled']) {
                 $_SESSION ['ZUIZZ'] ['FEATURES'] [$this->feature_id] ['tree_table']      = $this->config ['tree'] ['table'];
@@ -234,6 +234,7 @@ class ZUFEATURE
                     if (isset($section ['method'])) {
                         foreach ($section ['method'] as $method) {
                             $this->permissionset [$method] = $section ['bit'];
+
                         }
                     }
                 }

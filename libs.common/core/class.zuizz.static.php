@@ -198,8 +198,6 @@ class ZU
      */
     static function add_bit($val, $bit)
     {
-        if ($this->getperm($val, $bit))
-            return $val;
         return $val += '0x' . dechex(1 << ($bit - 1));
     }
 
@@ -212,10 +210,10 @@ class ZU
      */
     static function remove_bit($val, $bit)
     {
-        if (!$this->getperm($val, $bit))
-            return $val;
         return $val ^ (0 + ('0x' . dechex(1 << ($bit - 1))));
     }
+
+
 
     static function get_user_id()
     {
@@ -314,7 +312,7 @@ class ZU
      * @return int number of counted elements
      */
 
-    static function count($table, $where)
+    static function ORMselectCount($table, $where)
     {
         $q = ORM::for_table($table);
         foreach ($where as $key => $value) {
