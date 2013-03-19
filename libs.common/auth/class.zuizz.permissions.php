@@ -30,7 +30,9 @@ class ZUPERM
 
         // rechte die für everyone sind für alle
         // Userrechte  (und auch public rechte holen) , diese werden explizit gestzt!!
+
         $q = ORM::for_table('org_permission_user')->where_raw(('user_id = ? or user_id = ?'), array($this->user_id, EVERYONE))->find_many();
+
         foreach ($q as $tmp_perm) {
             $_SESSION ['ZUIZZ'] ['PERM'] [$tmp_perm->feature_type] [$tmp_perm->feature_node_id] ['perm']   = $tmp_perm->perm;
             $_SESSION ['ZUIZZ'] ['PERM'] [$tmp_perm->feature_type] [$tmp_perm->feature_node_id] ['perm_b'] = $tmp_perm->perm_b;
@@ -82,7 +84,7 @@ class ZUPERM
                 LEFT JOIN
                     " . ('org_permission_role') . "  perm ON role.role_id = perm.role_id
                 WHERE
-                    usr.org_user_id = :user_id", array('user_id' => $this->user_id))->find_many();
+                    usr.org_user_id in (:user_id, :everyone) ", array('user_id' => $this->user_id, 'everyone' => EVERYONE))->find_many();
 
         // Rollenrechte basierend der Rollen des Users   und Rollen des Users
         foreach ($q as $tmp_perm) {
