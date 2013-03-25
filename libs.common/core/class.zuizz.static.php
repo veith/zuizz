@@ -198,6 +198,11 @@ class ZU
      */
     static function add_bit($val, $bit)
     {
+<<<<<<< HEAD
+=======
+        if ( $this->getperm($val, $bit))
+            return $val;
+>>>>>>> indexer
         return $val += '0x' . dechex(1 << ($bit - 1));
     }
 
