@@ -42,7 +42,7 @@ class ZUFEATURE
             $GLOBALS ['smarty']->assignByRef("ZU", $GLOBALS ['ZU_FEATURE']);
             // defaults for features
             $GLOBALS ['ZU_FEATURE'] ['DEFAULTS'] ['date_format'] = $GLOBALS ['ZUIZZ']->config->locale ['smarty_date_format'];
-            $GLOBALS ['ZU_FEATURE'] ['SESSION']                  = & $_SESSION ['ZUIZZ'];
+            $GLOBALS ['ZU_FEATURE'] ['SESSION'] = & $_SESSION ['ZUIZZ'];
 
 
         }
@@ -94,10 +94,10 @@ class ZUFEATURE
             }
 
             if (isset ($this->config ['tree'] ['enabled']) && $this->config ['tree'] ['enabled']) {
-                $_SESSION ['ZUIZZ'] ['FEATURES'] [$this->feature_id] ['tree_table']      = $this->config ['tree'] ['table'];
+                $_SESSION ['ZUIZZ'] ['FEATURES'] [$this->feature_id] ['tree_table'] = $this->config ['tree'] ['table'];
                 $_SESSION ['ZUIZZ'] ['FEATURES'] [$this->feature_id] ['tree_identifier'] = $this->config ['tree'] ['identifier'];
-                $_SESSION ['ZUIZZ'] ['FEATURES'] [$this->feature_id] ['tree_root']       = $this->config ['tree'] ['root'];
-                $_SESSION ['ZUIZZ'] ['FEATURES'] [$this->feature_id] ['tree']            = true;
+                $_SESSION ['ZUIZZ'] ['FEATURES'] [$this->feature_id] ['tree_root'] = $this->config ['tree'] ['root'];
+                $_SESSION ['ZUIZZ'] ['FEATURES'] [$this->feature_id] ['tree'] = true;
             } else {
                 $_SESSION ['ZUIZZ'] ['FEATURES'] [$this->feature_id] ['tree'] = false;
             }
@@ -116,11 +116,11 @@ class ZUFEATURE
             foreach ($_POST as $key => $value) {
 
                 if (strpos($key, "f{$this->feature_id}") !== FALSE) {
-                    $feature_values [substr($key, strlen("f{$this->feature_id}"))]      = $value;
+                    $feature_values [substr($key, strlen("f{$this->feature_id}"))] = $value;
                     $feature_post_values [substr($key, strlen("f{$this->feature_id}"))] = $value;
                 } else {
                     if ($mode == 'rest') {
-                        $feature_values [$key]      = $value;
+                        $feature_values [$key] = $value;
                         $feature_post_values [$key] = $value;
                     }
                 }
@@ -134,10 +134,10 @@ class ZUFEATURE
             foreach ($GLOBALS ['_CLI'] as $key => $value) {
 
                 if (strpos($key, "f{$this->feature_id}") !== FALSE) {
-                    $feature_values [substr($key, strlen("f{$this->feature_id}"))]      = $value;
+                    $feature_values [substr($key, strlen("f{$this->feature_id}"))] = $value;
                     $feature_post_values [substr($key, strlen("f{$this->feature_id}"))] = $value;
                 } else {
-                    $feature_values [$key]     = $value;
+                    $feature_values [$key] = $value;
                     $feature_cli_values [$key] = $value;
                 }
 
@@ -151,11 +151,11 @@ class ZUFEATURE
         if (isset ($_GET)) {
             foreach ($_GET as $key => $value) {
                 if (strpos($key, "f{$this->feature_id}") !== FALSE) {
-                    $feature_values [substr($key, strlen("f{$this->feature_id}"))]     = $value;
+                    $feature_values [substr($key, strlen("f{$this->feature_id}"))] = $value;
                     $feature_get_values [substr($key, strlen("f{$this->feature_id}"))] = $value;
                 } else {
                     if ($mode == 'rest') {
-                        $feature_values [$key]     = $value;
+                        $feature_values [$key] = $value;
                         $feature_get_values [$key] = $value;
                     }
                 }
@@ -171,11 +171,11 @@ class ZUFEATURE
         if (isset ($GLOBALS['_PUT'])) {
             foreach ($GLOBALS['_PUT'] as $key => $value) {
                 if (strpos($key, "f{$this->feature_id}") !== FALSE) {
-                    $feature_values [substr($key, strlen("f{$this->feature_id}"))]     = $value;
+                    $feature_values [substr($key, strlen("f{$this->feature_id}"))] = $value;
                     $feature_put_values [substr($key, strlen("f{$this->feature_id}"))] = $value;
                 } else {
                     if ($mode == 'rest') {
-                        $feature_values [$key]     = $value;
+                        $feature_values [$key] = $value;
                         $feature_put_values [$key] = $value;
                     }
                 }
@@ -189,11 +189,11 @@ class ZUFEATURE
         if (isset ($GLOBALS['_DELETE'])) {
             foreach ($GLOBALS['_DELETE'] as $key => $value) {
                 if (strpos($key, "f{$this->feature_id}") !== FALSE) {
-                    $feature_values [substr($key, strlen("f{$this->feature_id}"))]        = $value;
+                    $feature_values [substr($key, strlen("f{$this->feature_id}"))] = $value;
                     $feature_delete_values [substr($key, strlen("f{$this->feature_id}"))] = $value;
                 } else {
                     if ($mode == 'rest') {
-                        $feature_values [$key]        = $value;
+                        $feature_values [$key] = $value;
                         $feature_delete_values [$key] = $value;
                     }
                 }
@@ -206,13 +206,14 @@ class ZUFEATURE
 
         // Get files
         if (isset ($_FILES)) {
+
             foreach ($_FILES as $key => $value) {
                 if (strpos($key, "f{$this->feature_id}") !== FALSE && $value ["error"] === 0) {
-                    $feature_values [substr($key, strlen("f{$this->feature_id}"))]      = $value;
+                    $feature_values [substr($key, strlen("f{$this->feature_id}"))] = $value;
                     $feature_file_values [substr($key, strlen("f{$this->feature_id}"))] = $value;
                 } else {
                     if ($mode == 'rest') {
-                        $feature_values [$key]      = $value;
+                        $feature_values [$key] = $value;
                         $feature_file_values [$key] = $value;
                     }
                 }
@@ -268,31 +269,32 @@ class ZUFEATURE
     }
 
 
-
     /**
      * SKIN Template Fetchen
      * feature werte werden assigned und das template dir auf den entsprechende pfad gesetzt
      */
-    function fetch()
+    function fetch($skin = null)
     {
-
-        $GLOBALS ['ZU_FEATURE'] [$this->feature_id] = (array("feature"      => $this->feature,
-                                                             "feature_lang" => $this->feature_lang,
-                                                             "view"         => basename($this->view),
-                                                             "parameter"    => $this->parameter,
-                                                             "translations" => $this->translations,
-                                                             "data"         => $this->data,
-                                                             "session"      => $this->session,
-                                                             "config"       => $this->config,
-                                                             "values"       => $this->values,
-                                                             "get"          => $this->get,
-                                                             "post"         => $this->post));
+        if ($skin != null) {
+            $this->skin = $skin;
+        }
+        $GLOBALS ['ZU_FEATURE'] [$this->feature_id] = (array("feature" => $this->feature,
+            "feature_lang" => $this->feature_lang,
+            "view" => basename($this->view),
+            "parameter" => $this->parameter,
+            "translations" => $this->translations,
+            "data" => $this->data,
+            "session" => $this->session,
+            "config" => $this->config,
+            "values" => $this->values,
+            "get" => $this->get,
+            "post" => $this->post));
         $GLOBALS ['smarty']->assignByRef("ZU_feature", $GLOBALS ['ZU_FEATURE'] [$this->feature_id]);
-        $GLOBALS ['smarty']->assign("ZU_view", array("feature"      => $this->feature,
-                                                     "feature_lang" => $this->feature_lang,
-                                                     "name"         => basename($this->view),
-                                                     "feature_id"   => $this->feature_id,
-                                                     "feature"      => $this->feature));
+        $GLOBALS ['smarty']->assign("ZU_view", array("feature" => $this->feature,
+            "feature_lang" => $this->feature_lang,
+            "name" => basename($this->view),
+            "feature_id" => $this->feature_id,
+            "feature" => $this->feature));
         set_error_handler("ZU::smarty_error_handler");
 
         if (is_file(ZU_DIR_CUSTOM_SKINS . "/{$this->viewmode}.{$this->feature}.{$this->view}/{$this->skin}.skin")) {
@@ -336,7 +338,7 @@ class ZUFEATURE
     function process_view($view, $parameter, $direct = FALSE)
     {
         $this->contentbuffer = "";
-        $this->view          = $view;
+        $this->view = $view;
         if (isset ($parameter ['skin'])) {
             $this->skin = $parameter ['skin'];
         } else {
@@ -468,8 +470,8 @@ class ZUFEATURE
         }
 
 
-        $missing    = array();
-        $invalid    = array();
+        $missing = array();
+        $invalid = array();
         $keepValues = array();
 
         // Dokumentation laden
@@ -716,7 +718,7 @@ class ZUFEATURE
     {
         if (!$feature) {
             $feature = $this->feature;
-            $dir     = $this->basedir;
+            $dir = $this->basedir;
         } else {
             $dir = ZU_DIR_FEATURE . $feature . '/';
         }
