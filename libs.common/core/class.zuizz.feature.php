@@ -727,6 +727,19 @@ class ZUFEATURE
             $GLOBALS ['ZUVALS'] ['classloader'] [$feature] ["{$sub_folder}__{$class_name}"] = true;
         }
     }
+    function load_interface($name, $feature = false, $sub_folder = '')
+    {
+        if (!$feature) {
+            $feature = $this->feature;
+            $dir = $this->basedir;
+        } else {
+            $dir = ZU_DIR_FEATURE . $feature . '/';
+        }
+        if (!isset ($GLOBALS ['ZUVALS'] ['classinterfaceloader'] [$feature] ["{$sub_folder}__{$name}"])) {
+            include $dir . "libs/{$sub_folder}/interface.{$name}.php";
+            $GLOBALS ['ZUVALS'] ['classinterfaceloader'] [$feature] ["{$sub_folder}__{$name}"] = true;
+        }
+    }
 
 }
 
