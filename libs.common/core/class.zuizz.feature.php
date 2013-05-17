@@ -440,7 +440,7 @@ class ZUFEATURE
             // Keine Doku vorhanden
             if (count($doc) == 0) {
                 header("HTTP/1.0 404 Documentation not found");
-                echo ("Dokumentation for feature {$apirequest} is not available or not implemented");
+                echo("Dokumentation for feature {$apirequest} is not available or not implemented");
                 die ();
 
             }
@@ -465,7 +465,7 @@ class ZUFEATURE
         if (is_file(ZU_DIR_FEATURE . "{$this->feature}/rest/{$this->view}/index.php")) {
         } else {
             ZU::header(405);
-            echo ("Method " . strtoupper($method) . " for feature {$this->feature}.{$rest} is not available or not implemented, try {$this->feature} with method OPTIONS for more information or ask the nerd nextdoor");
+            echo("Method " . strtoupper($method) . " for feature {$this->feature}.{$rest} is not available or not implemented, try {$this->feature} with method OPTIONS for more information or ask the nerd nextdoor");
             die ();
         }
 
@@ -480,7 +480,7 @@ class ZUFEATURE
         // ist Dokumentation vorhanden, wenn nicht wird dies als nicht implementiert betrachtet
         if (!is_file(ZU_DIR_FEATURE . "{$this->feature}/rest/{$this->view}/doc.json")) {
             header("HTTP/1.0 501 Not Implemented");
-            echo ("Feature {$apirequest} is not implemented, rst_apidoc is missing");
+            echo("Feature {$apirequest} is not implemented, rst_apidoc is missing");
             die ();
         } else {
             $apidoc = json_decode(file_get_contents(ZU_DIR_FEATURE . "{$this->feature}/rest/{$this->view}/doc.json"));
@@ -538,7 +538,7 @@ class ZUFEATURE
 
             if (count($missing) > 0) {
                 header("HTTP/1.0 400 Bad Request");
-                echo ("Required values missed: " . implode(", ", $missing));
+                echo("Required values missed: " . implode(", ", $missing));
                 die ();
             }
 
@@ -727,6 +727,7 @@ class ZUFEATURE
             $GLOBALS ['ZUVALS'] ['classloader'] [$feature] ["{$sub_folder}__{$class_name}"] = true;
         }
     }
+
     function load_interface($name, $feature = false, $sub_folder = '')
     {
         if (!$feature) {
@@ -740,6 +741,96 @@ class ZUFEATURE
             $GLOBALS ['ZUVALS'] ['classinterfaceloader'] [$feature] ["{$sub_folder}__{$name}"] = true;
         }
     }
+
+    function REST_fields(&$ORM)
+    {
+        if (is_array($this->values['fields']) && isset($this->fields)) {
+            $ORM->select('id');
+            foreach ($this->values['fields'] as $field) {
+                if (isset($this->fields[$field])) {
+                    $ORM->select($this->fields[$field][1]);
+                }
+            }
+        }
+    }
+
+    function REST_clean_types(&$data)
+    {
+
+        if (is_array($data)) {
+            foreach ($data as $k => $rec) {
+                foreach ($rec as $field => $val) {
+                    switch ($this->fields[$field][0]) {
+                        case 'int':
+                            $data[$k][$field] = (int)$val;
+                            break;
+                        case 'float':
+                            $data[$k][$field] = (float)$val;
+                            break;
+                        case 'boolean':
+                            $data[$k][$field] = (boolean)$val;
+                            break;
+                        case 'timestamp':
+                            $data[$k][$field] = (int)$val;
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
+    function REST_pagination($total,$num_of_records){
+        $p['records'] = (int) $total;
+        $p['results'] = (int) $num_of_records;
+        $p['limit'] = (int)$this->values['limit'];
+        $p['page'] = (int)$this->values['page'];
+        $p['pages'] = ceil($p['records'] / $p['limit']);
+        return $p;
+    }
+
+    function REST_scope(&$ORM)
+    {
+        if (is_array($this->values['scope']) && isset($this->fields)) {
+            foreach ($this->values['scope'] as $key => $scope) {
+                if (is_array($scope)) {
+                    switch ($scope[0]) {
+                        case 'lt':
+                            $ORM->where_lt($key, $scope[1]);
+                            break;
+                        case 'gt':
+                            $ORM->where_gt($key, $scope[1]);
+                            break;
+                        case 'lte':
+                            $ORM->where_lte($key, $scope[1]);
+                            break;
+                        case 'gte':
+                            $ORM->where_gte($key, $scope[1]);
+                            break;
+                        case 'odd':
+                            $ORM->where_odd($key, $scope[1]);
+                            break;
+                        case 'even':
+                            $ORM->where_even($key, $scope[1]);
+                            break;
+                        case 'contains':
+                            $ORM->where_like($key, '%' . $scope[1] . '%');
+                            break;
+                        case 'start_with':
+                            $ORM->where_like($key, $scope[1] . '%');
+                            break;
+                        case 'ends_with':
+                            $ORM->where_like($key, '%' . $scope[1]);
+                            break;
+                    }
+                } else {
+                    if (isset($this->fields[$key])) {
+                        $ORM->where($key, $scope);
+                    }
+                }
+            }
+        }
+    }
+
 
 }
 
