@@ -744,14 +744,21 @@ class ZUFEATURE
 
     function REST_fields(&$ORM)
     {
-        if (is_array($this->values['fields']) && isset($this->fields)) {
-            $ORM->select('id');
-            foreach ($this->values['fields'] as $field) {
-                if (isset($this->fields[$field])) {
-                    $ORM->select($this->fields[$field][1]);
+        if (isset($this->fields)) {
+            $ORM->select($this->fields['id'][1], 'id');
+            if (is_array($this->values['fields'])) {
+                foreach ($this->values['fields'] as $field) {
+                    if (isset($this->fields[$field])) {
+                        $ORM->select($this->fields[$field][1],$field);
+                    }
+                }
+            } else {
+                foreach ($this->fields as $key => $field) {
+                    $ORM->select($field[1], $key);
                 }
             }
         }
+
     }
 
     function REST_clean_types(&$data)
