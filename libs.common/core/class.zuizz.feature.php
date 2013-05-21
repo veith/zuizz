@@ -760,28 +760,31 @@ class ZUFEATURE
         if (is_array($data)) {
             foreach ($data as $k => $rec) {
                 foreach ($rec as $field => $val) {
-                    switch ($this->fields[$field][0]) {
-                        case 'int':
-                            $data[$k][$field] = (int)$val;
-                            break;
-                        case 'float':
-                            $data[$k][$field] = (float)$val;
-                            break;
-                        case 'boolean':
-                            $data[$k][$field] = (boolean)$val;
-                            break;
-                        case 'timestamp':
-                            $data[$k][$field] = (int)$val;
-                            break;
+                    if (isset($this->fields[$field][0])) {
+                        switch ($this->fields[$field][0]) {
+                            case 'int':
+                                $data[$k][$field] = (int)$val;
+                                break;
+                            case 'float':
+                                $data[$k][$field] = (float)$val;
+                                break;
+                            case 'boolean':
+                                $data[$k][$field] = (boolean)$val;
+                                break;
+                            case 'timestamp':
+                                $data[$k][$field] = (int)$val;
+                                break;
+                        }
                     }
                 }
             }
         }
     }
 
-    function REST_pagination($total,$num_of_records){
-        $p['records'] = (int) $total;
-        $p['results'] = (int) $num_of_records;
+    function REST_pagination($total, $num_of_records)
+    {
+        $p['records'] = (int)$total;
+        $p['results'] = (int)$num_of_records;
         $p['limit'] = (int)$this->values['limit'];
         $p['page'] = (int)$this->values['page'];
         $p['pages'] = ceil($p['records'] / $p['limit']);
