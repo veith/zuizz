@@ -749,7 +749,7 @@ class ZUFEATURE
             if (is_array($this->values['fields'])) {
                 foreach ($this->values['fields'] as $field) {
                     if (isset($this->fields[$field])) {
-                        $ORM->select($this->fields[$field][1],$field);
+                        $ORM->select($this->fields[$field][1], $field);
                     }
                 }
             } else {
@@ -796,6 +796,20 @@ class ZUFEATURE
         $p['page'] = (int)$this->values['page'];
         $p['pages'] = ceil($p['records'] / $p['limit']);
         return $p;
+    }
+
+    function REST_sortorder(&$ORM)
+    {
+        if ($this->values['order'] != null && isset($this->fields[$this->values['order']])) {
+                if ($this->values['order_dir'] == 1) {
+                    $ORM->order_by_asc($this->fields[$this->values['order']][1]);
+                } else {
+                    $ORM->order_by_desc($this->fields[$this->values['order']][1]);
+                }
+
+        } else {
+            $ORM->order_by_desc('id');
+        }
     }
 
     function REST_scope(&$ORM)
