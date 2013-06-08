@@ -408,7 +408,14 @@ class ZUFEATURE
         }
 
         if (isset ($_REQUEST ['ZU_identifier'])) {
-            $this->values['identifier'] = $_REQUEST ['ZU_identifier'];
+
+
+            if (is_array($_REQUEST ['ZU_identifier'])) {
+                $this->values['identifier'] = array_pop($_REQUEST ['ZU_identifier']);
+                $this->values['parent_identifier'] = $_REQUEST ['ZU_identifier'];
+            } else {
+                $this->values['identifier'] = $_REQUEST ['ZU_identifier'];
+            }
             if ($this->values['identifier'] == '') {
                 $this->values['identifier'] = NULL;
             }
@@ -478,12 +485,17 @@ class ZUFEATURE
 
 
         // ist Dokumentation vorhanden, wenn nicht wird dies als nicht implementiert betrachtet
-        if (!is_file(ZU_DIR_FEATURE . "{$this->feature}/rest/{$this->view}/doc.json")) {
+        if(isset($_REQUEST['ZU_version']) && $_REQUEST['ZU_version']>1){
+            $version = $_REQUEST['ZU_version'] . ".";
+        }else{
+            $version = "";
+        }
+        if (!is_file(ZU_DIR_FEATURE . "{$this->feature}/rest/{$this->view}/{$version}doc.json")) {
             header("HTTP/1.0 501 Not Implemented");
-            echo("Feature {$apirequest} is not implemented, rst_apidoc is missing");
+            echo("Feature {$apirequest} is not implemented,  {$version}doc.json missing");
             die ();
         } else {
-            $apidoc = json_decode(file_get_contents(ZU_DIR_FEATURE . "{$this->feature}/rest/{$this->view}/doc.json"));
+            $apidoc = json_decode(file_get_contents(ZU_DIR_FEATURE . "{$this->feature}/rest/{$this->view}/{$version}doc.json"));
         }
 
         foreach ($apidoc->parameter as $name => $tmp) {
@@ -500,7 +512,6 @@ class ZUFEATURE
                         }
                         break;
                     case 'put':
-
                         if ($tmp->required == 1 && !isset($this->put[$tmp->name])) {
                             $missing[] = $tmp->name;
                         }
@@ -545,6 +556,8 @@ class ZUFEATURE
 
             // validate or sanitize
 
+            //TODO:: put deep sanitizing here
+            //if(is_array($tmp->type)){ZU::print_array($tmp);}
             switch ($tmp->type) {
                 case '0':
                     //Numeric
@@ -682,7 +695,12 @@ class ZUFEATURE
 
         // view in methode abarbeiten
         $this->viewmode = "rest";
-        require ZU_DIR_FEATURE . "{$this->feature}/rest/{$this->view}/index.php";
+        if(isset($_REQUEST['ZU_version']) && $_REQUEST['ZU_version'] > 1){
+            require ZU_DIR_FEATURE . "{$this->feature}/rest/{$this->view}/{$_REQUEST['ZU_version']}/index.php";
+        }else{
+            require ZU_DIR_FEATURE . "{$this->feature}/rest/{$this->view}/index.php";
+        }
+
         return $this->contentbuffer;
     }
 
@@ -742,12 +760,16 @@ class ZUFEATURE
         }
     }
 
+    //fields=id,c_date,label,message
     function REST_fields(&$ORM)
     {
         if (isset($this->fields)) {
             $ORM->select($this->fields['id'][1], 'id');
-            if (is_array($this->values['fields'])) {
-                foreach ($this->values['fields'] as $field) {
+            if ($this->values['fields'] != null) {
+                $fieldlist = explode(",",$this->values['fields']);
+
+                foreach ($fieldlist as $field) {
+                    $field = trim($field);
                     if (isset($this->fields[$field])) {
                         $ORM->select($this->fields[$field][1], $field);
                     }
@@ -798,15 +820,27 @@ class ZUFEATURE
         return $p;
     }
 
+    // "age,-salary,kids"
     function REST_sortorder(&$ORM)
     {
-        if ($this->values['order'] != null && isset($this->fields[$this->values['order']])) {
-                if ($this->values['order_dir'] == 1) {
-                    $ORM->order_by_asc($this->fields[$this->values['order']][1]);
-                } else {
-                    $ORM->order_by_desc($this->fields[$this->values['order']][1]);
+        // explode
+        if ($this->values['sort'] != null) {
+            $orderbys = explode(',', $this->values['sort']);
+            foreach ($orderbys as $order) {
+               $key = trim($order);
+                $asc = true;
+                if(substr($key,0, 1) == "-"){
+                    $key = substr($key,1);
+                    $asc = false;
                 }
-
+                if (isset($this->fields[$key])) {
+                    if ($asc) {
+                        $ORM->order_by_asc($this->fields[$key][1]);
+                    } else {
+                        $ORM->order_by_desc($this->fields[$key][1]);
+                    }
+                }
+            }
         } else {
             $ORM->order_by_desc('id');
         }
@@ -816,10 +850,12 @@ class ZUFEATURE
     {
         if (is_array($this->values['scope']) && isset($this->fields)) {
             foreach ($this->values['scope'] as $key => $scope) {
+
                 if (is_array($scope)) {
                     switch ($scope[0]) {
                         case 'lt':
                             $ORM->where_lt($key, $scope[1]);
+
                             break;
                         case 'gt':
                             $ORM->where_gt($key, $scope[1]);
