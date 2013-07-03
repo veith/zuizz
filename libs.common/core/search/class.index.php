@@ -15,22 +15,31 @@ class ZUINDEX
 
     }
 
-    function index($string)
+    function parse($string)
     {
-        $numberlist = array();
-        $wordlist = array();
-        $datelist = array();
+        $list = array('words'=>array(),'numbers'=>array(), 'dates'=>array());
+
         /* Remove whitespace from beginning and end of string: */
         /* Try to remove all HTML-tags: */
         $string = preg_replace('/&\w;/', '', strip_tags(trim($string)));
+        // wortverbinder -
+        preg_match_all('/(*UTF8)\w+(-\w+)*/',$string,$wv);
 
-        /* Extract all words matching the regexp from the current line: */
+        foreach ($wv[0] as $word) {
 
-        preg_match_all('/(*UTF8)\b\w+\b/', $string, $words);
-        $tmp = $words[0];
+
+
+            $string = str_replace($word,str_replace('-',' ',$word),$string);
+        }
+
+
+        /* Extract all words */
+        preg_match_all('/(*UTF8)\b\S+\b/', $string, $words);
+
         /* Stemmen */
         foreach ($words[0] as $key => $word) {
-            if (is_numeric($word)) {
+            if (preg_match("/(\d|-)?(\d|,|\')*\.?\d{1,5}/", $word, $numbers)) {
+           // if (is_numeric($word)) {
                 unset($words[0][$key]);
             } else {
                 if (strlen($word) < 2) {
@@ -43,38 +52,36 @@ class ZUINDEX
                 }
             }
         }
+
         // duplikate entfernen
-        $wordlist = array_unique($words[0], SORT_STRING);
+        $list['words'] = array_unique($words[0], SORT_STRING);
 
-        //d{1,5} genau anschauen
-        preg_match_all("/(\d|-)?(\d|,|\')*\.?\d{1,5}/", $string, $numbers);
-        //preg_match_all("/(\d{1,2}[\.\/](\d{1,2}|\s?\D+\s?|\s?\w{3,12}\s?)[\.\/]\s?\d{2,4})/", $string, $numbers);
-        preg_match_all("/(\d{1,2}[\.\/](\d{1,2}[\.\/]|\s?\w{3}[\.\/]\s?|\s?\w{3,12}\s?)\d{2,4})/sm", $string, $numbers);
+        //Dates
+        preg_match_all("/(\d{1,2}[\.\/](\d{1,2}|\s?\D+\s?|\s?\w{3,12}\s?)[\.\/]\s?\d{2,4})/", $string, $numbers);
         foreach($numbers[0] as $key => $num){
-            $numberlist[] = str_replace(array(',',"'"),'',$num);
+            $list['dates'][] = $num;
+            $string = str_replace($num,'',$string);
         }
+        $list['dates'] = array_unique($list['dates']);
 
-        $numberlist = array_unique($numberlist);
-
-        setlocale(LC_TIME, "de_DE");
-        foreach($numberlist as $date){
-           echo $date . '==>' . date('d.m.Y', strtotime($date))   . "\n";
+        // numbers
+        //d{1,5} genau anschauen (max 5 Dezimalstellen)
+        preg_match_all("/(\d|-)?(\d|,|\')*\.?\d{1,5}/", $string, $numbers);
+        foreach($numbers[0] as $key => $num){
+            $list['numbers'][] = str_replace(array(',',"'"),array('.', ''),$num);
         }
-        ZU::print_array($numberlist);
+        $list['numbers'] = array_unique($list['numbers']);
 
-        echo date('d.m.Y', 1355000000). "\n";
-        echo date('d.m.Y', 1356000000). "\n";
-        echo date('d.m.Y', 1357000000). "\n";
-        echo date('d.m.Y', 1358000000). "\n";
-        echo date('d.m.Y', 1359000000). "\n";
-        echo date('d.m.Y', 1360000000). "\n";
-        echo date('d.m.Y', 1361000000). "\n";
-        echo date('d.m.Y', 1362000000). "\n";
+
+        return $list;
+
+
 
     }
 
     private function loadstopwords()
     {
+
         include('stopwords.php');
         $this->stopwords = $stopword;
 

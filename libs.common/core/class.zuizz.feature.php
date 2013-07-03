@@ -764,22 +764,33 @@ class ZUFEATURE
     function REST_fields(&$ORM)
     {
         if (isset($this->fields)) {
-            $ORM->select($this->fields['id'][1], 'id');
             if ($this->values['fields'] != null) {
                 $fieldlist = explode(",",$this->values['fields']);
-
+                $ORM->select($this->fields['id'][1], 'id');
                 foreach ($fieldlist as $field) {
                     $field = trim($field);
                     if (isset($this->fields[$field])) {
                         $ORM->select($this->fields[$field][1], $field);
                     }
+                    if(isset($this->fieldgroups[$field])){
+                        $this->fieldgroups[$field]=true;
+                    }
+
                 }
             } else {
                 foreach ($this->fields as $key => $field) {
                     $ORM->select($field[1], $key);
                 }
+
+                if(isset($this->fieldgroups) && is_array($this->fieldgroups)){
+                    foreach ($this->fieldgroups as $key => $val) {
+                        $this->fieldgroups[$key]=true;
+                    }
+                }
             }
         }
+
+
 
     }
 
