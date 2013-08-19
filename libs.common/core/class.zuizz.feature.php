@@ -1,5 +1,5 @@
 <?php
-
+/** @var $rest ZUREST */
 class ZUFEATURE
 {
     public $feature_id = null;
@@ -26,6 +26,7 @@ class ZUFEATURE
     public $object = array(); // Objekte
     private $viewmode = "web"; // Viewmode rest, web, ...
     public $session; // link von $this->session auf $_SESSION ['ZUIZZ'] ['FEATURES'] [$this->feature_id][sessionvalues]
+    public $rest;
 
 
     function __construct($feature, $mode)
@@ -374,6 +375,10 @@ class ZUFEATURE
      */
     function process_rest($rest, $parameter)
     {
+        ZU::load_class('zuizz.rest', 'core', false);
+        ZU::load_class('mod11', 'core', false);
+
+        $this->rest =   new ZUREST($this);
 
         $parameter;
         $method = strtolower($_SERVER ['REQUEST_METHOD']);
@@ -760,146 +765,33 @@ class ZUFEATURE
         }
     }
 
+    // for compatibility only. use $this->rest->select_fields() instead.
     //fields=id,c_date,label,message
     function REST_fields(&$ORM)
     {
-        if (isset($this->fields)) {
-            if ($this->values['fields'] != null) {
-                $fieldlist = explode(",",$this->values['fields']);
-                $ORM->select($this->fields['id'][1], 'id');
-                foreach ($fieldlist as $field) {
-                    $field = trim($field);
-                    if (isset($this->fields[$field])) {
-                        $ORM->select($this->fields[$field][1], $field);
-                    }
-                    if(isset($this->fieldgroups[$field])){
-                        $this->fieldgroups[$field]=true;
-                    }
-
-                }
-            } else {
-                foreach ($this->fields as $key => $field) {
-                    $ORM->select($field[1], $key);
-                }
-
-                if(isset($this->fieldgroups) && is_array($this->fieldgroups)){
-                    foreach ($this->fieldgroups as $key => $val) {
-                        $this->fieldgroups[$key]=true;
-                    }
-                }
-            }
-        }
-
-
-
+        $this->rest->select_fields($ORM);
     }
 
     function REST_clean_types(&$data)
     {
-
-        if (is_array($data)) {
-            foreach ($data as $k => $rec) {
-                foreach ($rec as $field => $val) {
-                    if (isset($this->fields[$field][0])) {
-                        switch ($this->fields[$field][0]) {
-                            case 'int':
-                                $data[$k][$field] = (int)$val;
-                                break;
-                            case 'float':
-                                $data[$k][$field] = (float)$val;
-                                break;
-                            case 'boolean':
-                                $data[$k][$field] = (boolean)$val;
-                                break;
-                            case 'timestamp':
-                                $data[$k][$field] = (int)$val;
-                                break;
-                        }
-                    }
-                }
-            }
-        }
+        $this->rest->clean_types($data);
     }
 
     function REST_pagination($total, $num_of_records)
     {
-        $p['records'] = (int)$total;
-        $p['results'] = (int)$num_of_records;
-        $p['limit'] = (int)$this->values['limit'];
-        $p['page'] = (int)$this->values['page'];
-        $p['pages'] = ceil($p['records'] / $p['limit']);
-        return $p;
+        return $this->rest->pagination($total, $num_of_records);
     }
 
     // "age,-salary,kids"
     function REST_sortorder(&$ORM)
     {
-        // explode
-        if ($this->values['sort'] != null) {
-            $orderbys = explode(',', $this->values['sort']);
-            foreach ($orderbys as $order) {
-               $key = trim($order);
-                $asc = true;
-                if(substr($key,0, 1) == "-"){
-                    $key = substr($key,1);
-                    $asc = false;
-                }
-                if (isset($this->fields[$key])) {
-                    if ($asc) {
-                        $ORM->order_by_asc($this->fields[$key][1]);
-                    } else {
-                        $ORM->order_by_desc($this->fields[$key][1]);
-                    }
-                }
-            }
-        } else {
-            $ORM->order_by_desc('id');
-        }
+        $this->rest->sortorder($ORM);
     }
 
     function REST_scope(&$ORM)
     {
-        if (is_array($this->values['scope']) && isset($this->fields)) {
-            foreach ($this->values['scope'] as $key => $scope) {
+        $this->rest->scope($ORM);
 
-                if (is_array($scope)) {
-                    switch ($scope[0]) {
-                        case 'lt':
-                            $ORM->where_lt($key, $scope[1]);
-
-                            break;
-                        case 'gt':
-                            $ORM->where_gt($key, $scope[1]);
-                            break;
-                        case 'lte':
-                            $ORM->where_lte($key, $scope[1]);
-                            break;
-                        case 'gte':
-                            $ORM->where_gte($key, $scope[1]);
-                            break;
-                        case 'odd':
-                            $ORM->where_odd($key, $scope[1]);
-                            break;
-                        case 'even':
-                            $ORM->where_even($key, $scope[1]);
-                            break;
-                        case 'contains':
-                            $ORM->where_like($key, '%' . $scope[1] . '%');
-                            break;
-                        case 'start_with':
-                            $ORM->where_like($key, $scope[1] . '%');
-                            break;
-                        case 'ends_with':
-                            $ORM->where_like($key, '%' . $scope[1]);
-                            break;
-                    }
-                } else {
-                    if (isset($this->fields[$key])) {
-                        $ORM->where($key, $scope);
-                    }
-                }
-            }
-        }
     }
 
 
