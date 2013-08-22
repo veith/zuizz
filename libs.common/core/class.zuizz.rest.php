@@ -50,7 +50,10 @@ class ZUREST
         }
     }
 
-    //fields=id,c_date,label,message
+    /*
+     * Autoselect expands in ORM by name of expand
+     */
+
     public function  select_expands(&$ORM, $expand)
     {
         if (isset($this->feature->expandfields[$expand])) {
