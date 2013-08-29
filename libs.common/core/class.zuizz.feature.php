@@ -380,104 +380,68 @@ class ZUFEATURE
 
         $this->rest =   new ZUREST($this);
 
-        $parameter;
+
         $method = strtolower($_SERVER ['REQUEST_METHOD']);
-        switch ($method) {
-            case "get":
-                $methodkey = 0;
-                break;
-            case "head":
-                $methodkey = 1;
-                break;
-            case "put":
-                $methodkey = 2;
-                break;
-            case "delete":
-                $methodkey = 3;
-                break;
-            case "post":
-                $methodkey = 4;
-                break;
-            case "options":
-                $methodkey = 5;
-                break;
-            case "trace":
-                $methodkey = 6;
-                break;
-            case "connect":
-                $methodkey = 7;
-                break;
-            default:
-                $methodkey = 0;
-                break;
-        }
 
         if (isset ($_REQUEST ['ZU_identifier'])) {
 
-
+            $this->values['identifiers'] = array();
             if (is_array($_REQUEST ['ZU_identifier'])) {
-                $this->values['identifier'] = array_pop($_REQUEST ['ZU_identifier']);
-                $this->values['parent_identifier'] = $_REQUEST ['ZU_identifier'];
+                $restlets = explode('.',$parameter['feature']);
+                foreach($_REQUEST ['ZU_identifier'] as $k => $v){
+                    $this->values['identifiers'][$restlets[$k+3]] = $v;
+                    $this->values['identifier'] = $v;
+                }
+
             } else {
                 $this->values['identifier'] = $_REQUEST ['ZU_identifier'];
             }
             if ($this->values['identifier'] == '') {
                 $this->values['identifier'] = NULL;
             }
+            $this->identifiers =& $this->values['identifiers'];
             $this->identifier =& $this->values['identifier'];
 
         }
 
-        $this->view = $rest . "/" . $method;
 
+        $this->view = $rest . "/_" . $method;
+        if (!is_dir(ZU_DIR_FEATURE . "{$this->feature}/rest/{$this->view}")) {
+            // for backward compatibility
+            // deprecated
+            $this->view = $rest . "/" . $method;
+        }
 
         $apirequest = $this->feature . "." . str_replace("/", ".", $rest);
 
+        // comes from mod rewrite
         if (isset ($_REQUEST ['ZU_mimetype'])) {
-            $this->mimetype = $_REQUEST ['ZU_mimetype'];
+            if($_REQUEST ['ZU_mimetype'][0]=='.'){
+                $this->mimetype = substr($_REQUEST ['ZU_mimetype'],1);
+            }else{
+
+                $this->mimetype = $_REQUEST ['ZU_mimetype'];
+            }
+
         } else {
             $this->mimetype = FALSE;
         }
 
 
-        if ($method == "options") {
-            foreach (glob(ZU_DIR_FEATURE . "{$this->feature}/rest/{$rest}/*", GLOB_ONLYDIR) as $allowed) {
-                if (is_file($allowed . "/index.php")) {
-                    $options[] = strtoupper(basename($allowed));
-                }
-            }
-            $options[] = "OPTIONS";
-            header("Allow: " . implode(", ", $options));
-            $doc['implemented'] = implode(", ", $options);
-            // Keine Doku vorhanden
-            if (count($doc) == 0) {
-                header("HTTP/1.0 404 Documentation not found");
-                echo("Dokumentation for feature {$apirequest} is not available or not implemented");
-                die ();
-
-            }
-            switch ($this->mimetype) {
-                case "json":
-                    header('Content-type: application/json');
-                    echo json_encode($doc);
-                    break;
-                case "xml":
-                    header('Content-type: application/xml');
-                    ZU::load_class('lalit.array2xml', 'xml', true);
-                    $xml = Array2XML::createXML('auth', $doc);
-                    echo $xml->saveXML();
-                    break;
-                default:
-                    ZU::print_array($doc);
-                    break;
-            }
-            die();
+        // ist Dokumentation vorhanden, wenn nicht wird dies als nicht implementiert betrachtet
+        if(isset($_REQUEST['ZU_version']) && $_REQUEST['ZU_version']>0){
+            $version = $_REQUEST['ZU_version'] . ".";
+            $this->version = $_REQUEST['ZU_version'];
+        }else{
+            $version = "";
+            $this->version = 0;
         }
 
-        if (is_file(ZU_DIR_FEATURE . "{$this->feature}/rest/{$this->view}/index.php")) {
+        if (is_file(ZU_DIR_FEATURE . "{$this->feature}/rest/{$this->view}/{$version}index.php")) {
+
         } else {
             ZU::header(405);
-            echo("Method " . strtoupper($method) . " for feature {$this->feature}.{$rest} is not available or not implemented, try {$this->feature} with method OPTIONS for more information or ask the nerd nextdoor");
+            echo("Method " . strtoupper($method) . " V:{$version} for feature {$this->feature}.{$rest} is not available or not implemented.");
             die ();
         }
 
@@ -487,14 +451,6 @@ class ZUFEATURE
         $keepValues = array();
 
         // Dokumentation laden
-
-
-        // ist Dokumentation vorhanden, wenn nicht wird dies als nicht implementiert betrachtet
-        if(isset($_REQUEST['ZU_version']) && $_REQUEST['ZU_version']>1){
-            $version = $_REQUEST['ZU_version'] . ".";
-        }else{
-            $version = "";
-        }
         if (!is_file(ZU_DIR_FEATURE . "{$this->feature}/rest/{$this->view}/{$version}doc.json")) {
             header("HTTP/1.0 501 Not Implemented");
             echo("Feature {$apirequest} is not implemented,  {$version}doc.json missing");
@@ -633,6 +589,11 @@ class ZUFEATURE
                     } else {
                         $this->values[$tmp->name] = filter_var($this->values[$tmp->name], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
                     }
+                    break;
+                case '10':
+                    // array
+                    //TODO::implement deep array check
+
                     break;
             }
         }

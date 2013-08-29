@@ -108,6 +108,7 @@ class ZUREST
 
     public function expand_requested($expand)
     {
+
         preg_match("/" . $expand . "\(([*|\ |\w+|,]+)\),?/i", $this->feature->values['expand'], $match);
         if (isset($match[1])) {
             return true;
