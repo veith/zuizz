@@ -31,12 +31,14 @@ class PorterStemmerDE
         $word = self::unumlaut($word);
         $word = mb_strtolower($word);
         $word = self::unniedlich($word);
+
         $word = self::step1($word);
         $word = self::step2($word);
         $word = self::step3($word);
         $word = self::unpraefix($word);
-        $word = self::undoubleconsonantending($word);
 
+        $word = self::undoubleconsonantending($word);
+        $word = self::undoubleletters($word);
 
         return $word;
     }
@@ -48,7 +50,17 @@ class PorterStemmerDE
     private static function ss2s($word)
     {
         return str_replace('ß', 'ss', $word);
+    }
 
+    /**
+     * undoubleletters
+     */
+    private static function undoubleletters($word)
+    {
+        preg_match_all('/(*UTF8)([a-z])\\1+/Uis', $word, $dl);
+        $word = str_replace($dl[0], $dl[1], $word);
+        preg_match_all('/(*UTF8)([a-z])\\1/Uis', $word, $dl);
+        return str_replace($dl[0], $dl[1], $word);
     }
 
     /**
@@ -56,20 +68,19 @@ class PorterStemmerDE
      */
     private static function undoubleconsonantending($word)
     {
-
-        if (!is_numeric(substr($word, -2, 1)) &&substr($word, -2, 1) == substr($word, -1, 1)) {
+        if (!is_numeric(substr($word, -2, 1)) && substr($word, -2, 1) == substr($word, -1, 1)) {
             return substr($word, 0, -1);
         } else {
             return $word;
         }
-
     }
 
     /**
      *   umlaute
      */
-    private static function unumlaut($word)
+    public static function unumlaut($word)
     {
+
         return str_replace(array('ä', 'ö', 'ü'), array('a', 'o', 'u'), $word);
 
     }
@@ -80,7 +91,7 @@ class PorterStemmerDE
     private static function unniedlich($word)
     {
         self::sufixreplace($word, 'chens', '', 0)
-            || self::sufixreplace($word, 'chen', '', 0);
+        || self::sufixreplace($word, 'chen', '', 0);
         return $word;
     }
 
@@ -89,27 +100,28 @@ class PorterStemmerDE
      */
     private static function unpraefix($word)
     {
-            self::praefixreplace($word, 'ander', 'ander') ||
-            self::praefixreplace($word, 'andr', 'andr') ||
-            self::praefixreplace($word, 'abge', '', 1) ||
-            self::praefixreplace($word, 'ab', '', 1) ||
-            self::praefixreplace($word, 'an', '', 1) ||
-            self::praefixreplace($word, 'auf', '', 1) ||
-            self::praefixreplace($word, 'aus', '', 1) ||
-            self::praefixreplace($word, 'bei', '', 1) ||
-            self::praefixreplace($word, 'ein', '', 1) ||
-            self::praefixreplace($word, 'los', '', 1) ||
-            self::praefixreplace($word, 'mit', '', 1) ||
-            self::praefixreplace($word, 'nach', '', 1) ||
-            self::praefixreplace($word, 'her', '', 1) ||
-            self::praefixreplace($word, 'hin', '', 1) ||
-            self::praefixreplace($word, 'um', '', 1) ||
-            self::praefixreplace($word, 'vor', '', 1) ||
-            self::praefixreplace($word, 'weg', '', 1) ||
-            self::praefixreplace($word, 'zuruck', '', 1) ||
-            self::praefixreplace($word, 'zurecht', '', 1) ||
-            self::praefixreplace($word, 'zusammen', '', 1) ||
-            self::praefixreplace($word, 'zu', '');
+        self::praefixreplace($word, 'ander', 'ander') ||
+        self::praefixreplace($word, 'andr', 'andr') ||
+        self::praefixreplace($word, 'abge', '', 1) ||
+        self::praefixreplace($word, 'ab', '', 1) ||
+        self::praefixreplace($word, 'an', '', 1) ||
+        self::praefixreplace($word, 'auf', '', 1) ||
+        self::praefixreplace($word, 'aus', '', 1) ||
+        self::praefixreplace($word, 'bei', '', 1) ||
+        self::praefixreplace($word, 'ein', '', 1) ||
+        self::praefixreplace($word, 'los', '', 1) ||
+        self::praefixreplace($word, 'mit', '', 1) ||
+        self::praefixreplace($word, 'nach', '', 1) ||
+        self::praefixreplace($word, 'her', '', 1) ||
+        self::praefixreplace($word, 'hin', '', 1) ||
+        self::praefixreplace($word, 'um', '', 1) ||
+        self::praefixreplace($word, 'vor', '', 1) ||
+        self::praefixreplace($word, 'ver', '', 0) ||
+        self::praefixreplace($word, 'weg', '', 1) ||
+        self::praefixreplace($word, 'zuruck', '', 1) ||
+        self::praefixreplace($word, 'zurecht', '', 1) ||
+        self::praefixreplace($word, 'zusammen', '', 0) ||
+        self::praefixreplace($word, 'zu', '', 1);
         return $word;
     }
 
@@ -128,7 +140,7 @@ class PorterStemmerDE
      */
     private static function step1($word)
     {
-        self::sufixreplace($word, 'em', '', 0) || self::sufixreplace($word, 'ern', '', 0) || self::sufixreplace($word, 'erm', '', 0) || self::sufixreplace($word, 'er', '', 0);
+        self::sufixreplace($word, 'ieren', '', 1) ||self::sufixreplace($word, 'em', '', 0) || self::sufixreplace($word, 'ern', '', 0) || self::sufixreplace($word, 'erm', '', 0) || self::sufixreplace($word, 'er', '', 0);
         self::sufixreplace($word, 'e', '', 0) || self::sufixreplace($word, 'en', '', 0) || self::sufixreplace($word, 'es', '', 0);
 
         // valid s endings
@@ -155,7 +167,7 @@ class PorterStemmerDE
      */
     private static function step2($word)
     {
-        self::sufixreplace($word, 'en', '', 0) || self::sufixreplace($word, 'er', '', 0) || self::sufixreplace($word, 'est', '', 0);
+         self::sufixreplace($word, 'iert', 'ier', 0) || self::sufixreplace($word, 'en', '', 0) || self::sufixreplace($word, 'er', '', 0) || self::sufixreplace($word, 'est', '', 0);
         // valid s endings
         if (substr($word, -2) == 'st') {
             if (in_array(substr($word, -3, 1), array("b", "d", "f", "g", "h", "k", "l", "m", "n", "t"))) {
@@ -184,6 +196,9 @@ class PorterStemmerDE
      *   keit
      *   delete if in R2
      *   if preceded by lich or ig, delete if in R2
+     *
+     *
+     *
      */
     private static function step3($word)
     {
@@ -192,6 +207,7 @@ class PorterStemmerDE
         self::sufixreplace($word, 'lich', '', 0) || self::sufixreplace($word, 'heit', '', 0);
         self::sufixreplace($word, 'keit', '', 0) || self::sufixreplace($word, 'lein', '', 0);
         self::sufixreplace($word, 'zier', 'z', 0);
+        self::sufixreplace($word, 'et', '', 1);
 
         return $word;
     }
@@ -204,7 +220,7 @@ class PorterStemmerDE
      * @param  string $str   String to check
      * @param  string $check Ending to check for
      * @param  string $repl  Replacement string
-     * @param  int    $m     Optional minimum number of m() to meet
+     * @param  int $m     Optional minimum number of m() to meet
      * @return bool          Whether the $check string was at the end
      *                       of the $str string. True does not necessarily mean
      *                       that it was replaced.

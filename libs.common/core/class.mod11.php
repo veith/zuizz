@@ -7,8 +7,8 @@ class  M11
     *  im array umgekehrt um 1 math op zu sparen.
     */
     private static $weight = array(2, 4, 6, 8, 7, 9, 5, 3);
-    private static $theprimenumber = 99991;
-    private static $thejumper = 11; // abstand zwischen den Nummern
+    private static $theprimenumber = 997;
+    private static $thejumper = 23; // abstand zwischen den Nummern
 
     /*
      * Prüfe Nummer auf korrektheit
@@ -29,7 +29,8 @@ class  M11
      */
     static function generatePNumber($number)
     {
-        return intval($number . self::getChecksum($number));
+
+        return intval($number .  self::getChecksum($number));
     }
 
     /*
@@ -44,7 +45,13 @@ class  M11
                 $sum += $val * $number[$index];
             }
         }
-        return $sum % 11;
+
+        $cs = $sum % 11;
+        if($cs == 10){
+            return 0;
+        }else{
+            return $cs;
+        }
     }
 
     /*
@@ -66,7 +73,7 @@ class  M11
     */
     static function getIdFromPNumber($number)
     {
-        $id = (substr($number, 0, -1) - self::$theprimenumber) / self::$thejumper;
+         $id = ((substr($number, 0, -1)) - self::$theprimenumber) / self::$thejumper;
         if (is_int($id) && $id > 0) {
             return $id;
         } else {
@@ -87,5 +94,22 @@ class  M11
             return $id * self::$thejumper + self::$theprimenumber;
         }
     }
+
+    static function encode($int){
+        return self::generateNumber($int,true);
+    }
+
+    static function decode($num){
+        return self::getIdFromPNumber($num);
+    }
+
+    static function encode32($int){
+        return base_convert(self::generateNumber($int,true),10,32);
+    }
+
+    static function decode32($num){
+        return self::getIdFromPNumber(base_convert($num,32,10)) ;
+    }
+
 
 }

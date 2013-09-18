@@ -1,5 +1,5 @@
 <?php
-
+/** @var $rest ZUREST */
 class ZUFEATURE
 {
     public $feature_id = null;
@@ -26,6 +26,7 @@ class ZUFEATURE
     public $object = array(); // Objekte
     private $viewmode = "web"; // Viewmode rest, web, ...
     public $session; // link von $this->session auf $_SESSION ['ZUIZZ'] ['FEATURES'] [$this->feature_id][sessionvalues]
+    public $rest;
 
 
     function __construct($feature, $mode)
@@ -389,105 +390,73 @@ class ZUFEATURE
      */
     function process_rest($rest, $parameter)
     {
+        ZU::load_class('zuizz.rest', 'core', false);
+        ZU::load_class('mod11', 'core', false);
 
-        $parameter;
+        $this->rest =   new ZUREST($this);
+
+
         $method = strtolower($_SERVER ['REQUEST_METHOD']);
-        switch ($method) {
-            case "get":
-                $methodkey = 0;
-                break;
-            case "head":
-                $methodkey = 1;
-                break;
-            case "put":
-                $methodkey = 2;
-                break;
-            case "delete":
-                $methodkey = 3;
-                break;
-            case "post":
-                $methodkey = 4;
-                break;
-            case "options":
-                $methodkey = 5;
-                break;
-            case "trace":
-                $methodkey = 6;
-                break;
-            case "connect":
-                $methodkey = 7;
-                break;
-            default:
-                $methodkey = 0;
-                break;
-        }
 
         if (isset ($_REQUEST ['ZU_identifier'])) {
 
-
+            $this->values['identifiers'] = array();
             if (is_array($_REQUEST ['ZU_identifier'])) {
-                $this->values['identifier'] = array_pop($_REQUEST ['ZU_identifier']);
-                $this->values['parent_identifier'] = $_REQUEST ['ZU_identifier'];
+                $restlets = explode('.',$parameter['feature']);
+                foreach($_REQUEST ['ZU_identifier'] as $k => $v){
+                    $this->values['identifiers'][$restlets[$k+3]] = $v;
+                    $this->values['identifier'] = $v;
+                }
+
             } else {
                 $this->values['identifier'] = $_REQUEST ['ZU_identifier'];
             }
             if ($this->values['identifier'] == '') {
                 $this->values['identifier'] = NULL;
             }
+            $this->identifiers =& $this->values['identifiers'];
             $this->identifier =& $this->values['identifier'];
 
         }
 
-        $this->view = $rest . "/" . $method;
 
+        $this->view = $rest . "/_" . $method;
+        if (!is_dir(ZU_DIR_FEATURE . "{$this->feature}/rest/{$this->view}")) {
+            // for backward compatibility
+            // deprecated
+            $this->view = $rest . "/" . $method;
+        }
 
         $apirequest = $this->feature . "." . str_replace("/", ".", $rest);
 
+        // comes from mod rewrite
         if (isset ($_REQUEST ['ZU_mimetype'])) {
-            $this->mimetype = $_REQUEST ['ZU_mimetype'];
+            if($_REQUEST ['ZU_mimetype'][0]=='.'){
+                $this->mimetype = substr($_REQUEST ['ZU_mimetype'],1);
+            }else{
+
+                $this->mimetype = $_REQUEST ['ZU_mimetype'];
+            }
+
         } else {
             $this->mimetype = FALSE;
         }
 
 
-        if ($method == "options") {
-            foreach (glob(ZU_DIR_FEATURE . "{$this->feature}/rest/{$rest}/*", GLOB_ONLYDIR) as $allowed) {
-                if (is_file($allowed . "/index.php")) {
-                    $options[] = strtoupper(basename($allowed));
-                }
-            }
-            $options[] = "OPTIONS";
-            header("Allow: " . implode(", ", $options));
-            $doc['implemented'] = implode(", ", $options);
-            // Keine Doku vorhanden
-            if (count($doc) == 0) {
-                header("HTTP/1.0 404 Documentation not found");
-                echo("Dokumentation for feature {$apirequest} is not available or not implemented");
-                die ();
-
-            }
-            switch ($this->mimetype) {
-                case "json":
-                    header('Content-type: application/json');
-                    echo json_encode($doc);
-                    break;
-                case "xml":
-                    header('Content-type: application/xml');
-                    ZU::load_class('lalit.array2xml', 'xml', true);
-                    $xml = Array2XML::createXML('auth', $doc);
-                    echo $xml->saveXML();
-                    break;
-                default:
-                    ZU::print_array($doc);
-                    break;
-            }
-            die();
+        // ist Dokumentation vorhanden, wenn nicht wird dies als nicht implementiert betrachtet
+        if(isset($_REQUEST['ZU_version']) && $_REQUEST['ZU_version']>0){
+            $version = $_REQUEST['ZU_version'] . ".";
+            $this->version = $_REQUEST['ZU_version'];
+        }else{
+            $version = "";
+            $this->version = 0;
         }
 
-        if (is_file(ZU_DIR_FEATURE . "{$this->feature}/rest/{$this->view}/index.php")) {
+        if (is_file(ZU_DIR_FEATURE . "{$this->feature}/rest/{$this->view}/{$version}index.php")) {
+
         } else {
             ZU::header(405);
-            echo("Method " . strtoupper($method) . " for feature {$this->feature}.{$rest} is not available or not implemented, try {$this->feature} with method OPTIONS for more information or ask the nerd nextdoor");
+            echo("Method " . strtoupper($method) . " V:{$version} for feature {$this->feature}.{$rest} is not available or not implemented.");
             die ();
         }
 
@@ -497,14 +466,6 @@ class ZUFEATURE
         $keepValues = array();
 
         // Dokumentation laden
-
-
-        // ist Dokumentation vorhanden, wenn nicht wird dies als nicht implementiert betrachtet
-        if(isset($_REQUEST['ZU_version']) && $_REQUEST['ZU_version']>1){
-            $version = $_REQUEST['ZU_version'] . ".";
-        }else{
-            $version = "";
-        }
         if (!is_file(ZU_DIR_FEATURE . "{$this->feature}/rest/{$this->view}/{$version}doc.json")) {
             header("HTTP/1.0 501 Not Implemented");
             echo("Feature {$apirequest} is not implemented,  {$version}doc.json missing");
@@ -644,6 +605,11 @@ class ZUFEATURE
                         $this->values[$tmp->name] = filter_var($this->values[$tmp->name], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
                     }
                     break;
+                case '10':
+                    // array
+                    //TODO::implement deep array check
+
+                    break;
             }
         }
 
@@ -775,135 +741,33 @@ class ZUFEATURE
         }
     }
 
+    // for compatibility only. use $this->rest->select_fields() instead.
     //fields=id,c_date,label,message
     function REST_fields(&$ORM)
     {
-        if (isset($this->fields)) {
-            $ORM->select($this->fields['id'][1], 'id');
-            if ($this->values['fields'] != null) {
-                $fieldlist = explode(",",$this->values['fields']);
-
-                foreach ($fieldlist as $field) {
-                    $field = trim($field);
-                    if (isset($this->fields[$field])) {
-                        $ORM->select($this->fields[$field][1], $field);
-                    }
-                }
-            } else {
-                foreach ($this->fields as $key => $field) {
-                    $ORM->select($field[1], $key);
-                }
-            }
-        }
-
+        $this->rest->select_fields($ORM);
     }
 
     function REST_clean_types(&$data)
     {
-
-        if (is_array($data)) {
-            foreach ($data as $k => $rec) {
-                foreach ($rec as $field => $val) {
-                    if (isset($this->fields[$field][0])) {
-                        switch ($this->fields[$field][0]) {
-                            case 'int':
-                                $data[$k][$field] = (int)$val;
-                                break;
-                            case 'float':
-                                $data[$k][$field] = (float)$val;
-                                break;
-                            case 'boolean':
-                                $data[$k][$field] = (boolean)$val;
-                                break;
-                            case 'timestamp':
-                                $data[$k][$field] = (int)$val;
-                                break;
-                        }
-                    }
-                }
-            }
-        }
+        $this->rest->clean_types($data);
     }
 
     function REST_pagination($total, $num_of_records)
     {
-        $p['records'] = (int)$total;
-        $p['results'] = (int)$num_of_records;
-        $p['limit'] = (int)$this->values['limit'];
-        $p['page'] = (int)$this->values['page'];
-        $p['pages'] = ceil($p['records'] / $p['limit']);
-        return $p;
+        return $this->rest->pagination($total, $num_of_records);
     }
 
     // "age,-salary,kids"
     function REST_sortorder(&$ORM)
     {
-        // explode
-        if ($this->values['sort'] != null) {
-            $orderbys = explode(',', $this->values['sort']);
-            foreach ($orderbys as $order) {
-               $key = trim($order);
-                $asc = true;
-                if(substr($key,0, 1) == "-"){
-                    $key = substr($key,1);
-                    $asc = false;
-                }
-                if (isset($this->fields[$key])) {
-                    if ($asc) {
-                        $ORM->order_by_asc($this->fields[$key][1]);
-                    } else {
-                        $ORM->order_by_desc($this->fields[$key][1]);
-                    }
-                }
-            }
-        } else {
-            $ORM->order_by_desc('id');
-        }
+        $this->rest->sortorder($ORM);
     }
 
     function REST_scope(&$ORM)
     {
-        if (is_array($this->values['scope']) && isset($this->fields)) {
-            foreach ($this->values['scope'] as $key => $scope) {
+        $this->rest->scope($ORM);
 
-                if (is_array($scope)) {
-                    switch ($scope[0]) {
-                        case 'lt':
-                            $ORM->where_lt($key, $scope[1]);
-
-                            break;
-                        case 'gt':
-                            $ORM->where_gt($key, $scope[1]);
-                            break;
-                        case 'lte':
-                            $ORM->where_lte($key, $scope[1]);
-                            break;
-                        case 'gte':
-                            $ORM->where_gte($key, $scope[1]);
-                            break;
-                        case 'odd':
-                            $ORM->where_odd($key, $scope[1]);
-                            break;
-                        case 'even':
-                            $ORM->where_even($key, $scope[1]);
-                            break;
-                        case 'contains':
-                            $ORM->where_like($key, '%' . $scope[1] . '%');
-                            break;
-                        case 'start_with':
-                            $ORM->where_like($key, $scope[1] . '%');
-                            break;
-                        case 'ends_with':
-                            $ORM->where_like($key, '%' . $scope[1]);
-                            break;
-                    }
-                } else {
-                    if (isset($this->fields[$key])) {
-                        $ORM->where($key, $scope);
-                    }
-                }
-            }
-        }
     }
 
 

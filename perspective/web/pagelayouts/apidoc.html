@@ -1,79 +1,52 @@
 <!DOCTYPE html>
 <html lang="{$smarty.session.ZUIZZ.LANG.interface_lang}">
+
 <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta charset="utf-8">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- [head:tags] -->
     <!-- [head:metatags] -->
     <!-- [head:css] -->
     <title><!-- [head:title] --></title>
 
-    <!-- Le styles -->
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+    <script src="/jslibs/utils/html5shiv.js"></script>
+    <![endif]-->
 
-    <link type="text/css" href="/css/bootstrap.css" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Roboto:400,300,700' rel='stylesheet' type='text/css'>
+    <link type="text/css" href="/css/bootplus.css" rel="stylesheet">
+
+
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="/media/favicon.ico">
+    <link rel="apple-touch-icon" href="/media/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/media/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/media/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/media/apple-touch-icon-144x144.png" />
 </head>
 
 <body>
-<div class="navbar navbar-fixed">
-    <div class="navbar-inner">
-        <div class="container">
-            <a class="brand" href="/">ZUIZZ Apidoc</a>
-            <!-- [zone:navbar] -->
 
-        </div>
-    </div>
+
+{ZU_fragment feature="com.zuizz.pages.navbar" page=2 skin="apidoc"}
+
+<div class="container">
+    <!-- [zone:default] -->
 </div>
 
 
-<div class="container login">
-
-    <div class="row">
-        <div class="span4">
-            <!-- [zone:topsidebar] -->
-        </div>
-        <div class="span8">
-            <!-- [zone:topdefault] -->
-        </div>
-    </div>
-    <div class="row">
-        <div class="span4">
-            <!-- [zone:sidebar] -->
-        </div>
-        <div class="span8">
-            <!-- [zone:default] -->
-        </div>
-    </div>
-</div>
-
-
-
-</div>
-</div>
-
-<div class="bottombar" id="zu_bottompane">
-
-    <div class="container">
-        <div id="zu_activitybar">
-
-            <!-- [zone:activity] -->
-        </div>
-        <div id="zu_statusbar">&copy; Thenerdsnextdoor 2012<!-- [zone:status] --></div>
-        <div id="zu_alert"><!-- [zone:alert] --></div>
-    </div>
-
-</div>
 
 <script src="/jslibs/jquery-1.8.3.min.js"></script>
-
-<script src="/jslibs/libraries/jquery.address-1.4.min.js"></script>
 <script src="/jslibs/plugins/twitter/bootstrap.min.js"></script>
-
-<script src="/jslibs/utils/traits.zuizz.js"></script>
-
-<script src="/jslibs/libraries/doT.js"></script>
 <script src="/jslibs/terrific-2.0.1.min.js"></script>
+<script src="/jslibs/Tc.zu.2.0.1.js"></script>
+<script src="/jslibs/libraries/doT.min.js"></script>
 
 <!-- [head:js] -->
-
 
 <!-- Terri -->
 <script type="text/javascript">
@@ -82,15 +55,7 @@
         // Tc2
         $(document).ready(function() {
             var $page = $('body'),
-                    config = {
-                        dependencyPath: {
-                            library: '/jslibs/libraries/',
-                            plugin: '/jslibs/plugins/',
-                            util: '/jslibs/utils/'
-                        }
-                    },
-                    application = new Tc.Application($page, config);
-
+                    application = new Tc.Application($page);
             application.registerModules();
             application.start();
 
