@@ -64,6 +64,21 @@ class ZUFEATURE
             $this->config = array_merge($this->config, $tmpconf);
         }
 
+        //Universal Config
+        $UC = json_decode(getenv($this->feature . '.config'), true);
+        if (is_array($UC)) {
+            foreach ($UC as $k => $segment) {
+                if(isset($this->config->$k)){
+                    $this->config[$k] = ZU::array_merge_recursive_distinct($this->config->$k, $segment);
+                }else{
+                    $this->config[$k] =  $segment;
+                }
+
+            }
+        }
+
+
+
         // read additional ini files
         if (isset ($this->config ['additional_ini_files'])) {
             foreach ($this->config ['additional_ini_files'] as $key => $file) {
