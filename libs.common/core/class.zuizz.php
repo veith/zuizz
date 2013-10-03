@@ -48,10 +48,12 @@ class ZUIZZ
 
         // idiorm
         ZU::load_class('idiorm', 'core');
+
         ORM::configure('mysql:host=' . $this->config->db ['hostname'] . ";dbname=" . $this->config->db ['database'] . ";port=" . $this->config->db ['port'] . '"');
         ORM::configure('username', $this->config->db ['username']);
         ORM::configure('password', $this->config->db ['password']);
         ORM::configure('driver_options', array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
+
 
         // load and enable logger class
         ZU::load_class('zuizz.logger', 'core');
