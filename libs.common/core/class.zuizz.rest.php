@@ -29,7 +29,7 @@ class ZUREST
                 //$ORM->select($this->feature->fields['id'][1], 'id');
                 foreach ($fieldlist as $field) {
                     $field = trim($field);
-                    if (isset($this->feature->fields[$field])) {
+                    if (isset($this->feature->fields[$field]) && isset($this->feature->fields[$field][1])) {
                         $ORM->select($this->feature->fields[$field][1], $field);
                     }
                     if (isset($this->feature->fieldgroups[$field])) {
@@ -38,7 +38,10 @@ class ZUREST
                 }
             } else {
                 foreach ($this->feature->fields as $key => $field) {
-                    $ORM->select($field[1], $key);
+                    if(isset($field[1])){
+                         $ORM->select($field[1], $key);
+                    }
+
                 }
 
                 if (isset($this->feature->fieldgroups) && is_array($this->feature->fieldgroups)) {
