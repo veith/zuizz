@@ -214,7 +214,6 @@ class ZU
     }
 
 
-
     static function get_user_id()
     {
         return $_SESSION ['ZUIZZ'] ['AUTH'] ['uid'];
@@ -257,7 +256,7 @@ class ZU
     /**
      * assigns a variable to the smarty object
      *
-     * @val       mixed Value to be assigned
+     * @val mixed Value to be assigned
      * @var string Name of the Variable
      * @permanent bool Keep the assignment in Session for later use
      * @return void No value is returned.
@@ -285,7 +284,6 @@ class ZU
     }
 
 
-
     static function translate_string($string, $lang = false)
     {
         if (!$lang) {
@@ -305,13 +303,12 @@ class ZU
     }
 
     /**
-     * fetchCount Simple count for table elements
+     * ORMselectCount Simple count for table elements
      *
      * @table string name of the table
      * @where array key value pairs of table fields
      * @return int number of counted elements
      */
-
     static function ORMselectCount($table, $where)
     {
         $q = ORM::for_table($table);
@@ -320,6 +317,28 @@ class ZU
         }
         return $q->count();
 
+    }
+
+    /*
+    * @param array $array1
+    * @param array $array2
+    * @return array
+    * @author Daniel <daniel (at) danielsmedegaardbuus (dot) dk>
+    * @author Gabriel Sobrinho <gabriel (dot) sobrinho (at) gmail (dot) com>
+    */
+    static function array_merge_recursive_distinct(array &$array1, array &$array2)
+    {
+        $merged = $array1;
+
+        foreach ($array2 as $key => &$value) {
+            if (is_array($value) && isset ($merged [$key]) && is_array($merged [$key])) {
+                $merged [$key] = array_merge_recursive_distinct($merged [$key], $value);
+            } else {
+                $merged [$key] = $value;
+            }
+        }
+
+        return $merged;
     }
 }
 
