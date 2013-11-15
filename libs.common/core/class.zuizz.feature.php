@@ -516,7 +516,6 @@ class ZUFEATURE
 
 
             // validate or sanitize
-
             //TODO:: put deep sanitizing here
             //if(is_array($tmp->type)){ZU::print_array($tmp);}
             switch ($tmp->type) {

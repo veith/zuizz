@@ -142,6 +142,9 @@ class ZUREST
                                 case 'id':
                                     $row[$field] = M11::encode32($val);
                                     break;
+                                case 'enc32':
+                                    $row[$field] = M11::encode32($val);
+                                    break;
                                 default:
                                     $row[$field] = (int)$val;
                             }
