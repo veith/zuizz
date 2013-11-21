@@ -477,7 +477,7 @@ class ZUFEATURE
         foreach ($apidoc->parameter as $name => $tmp) {
 
             $keepValues[] = $tmp->name;
-            // kommen die required Werte mit der richtigen Methode Identifier ist ein reserviertes wort
+            // kommen die required Werte mit der richtigen Methode? Identifier ist ein reserviertes wort
 
 
             if ($tmp->name != 'identifier') {
@@ -518,7 +518,7 @@ class ZUFEATURE
                 }
 
             }
-            if (!isset($this->values[$tmp->name]) && $tmp->default_value != NULL) {
+            if ((!isset($this->values[$tmp->name]) || $this->values[$tmp->name] == NULL) && $tmp->default_value != NULL) {
                 $this->values[$tmp->name] = ($tmp->default_value);
             }
 
