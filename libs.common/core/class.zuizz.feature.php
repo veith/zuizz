@@ -69,15 +69,14 @@ class ZUFEATURE
         $UC = json_decode(getenv($this->feature . '.config'), true);
         if (is_array($UC)) {
             foreach ($UC as $k => $segment) {
-                if(isset($this->config->$k)){
+                if (isset($this->config->$k)) {
                     $this->config[$k] = ZU::array_merge_recursive_distinct($this->config->$k, $segment);
-                }else{
-                    $this->config[$k] =  $segment;
+                } else {
+                    $this->config[$k] = $segment;
                 }
 
             }
         }
-
 
 
         // read additional ini files
@@ -393,7 +392,7 @@ class ZUFEATURE
         ZU::load_class('zuizz.rest', 'core', false);
         ZU::load_class('mod11', 'core', false);
 
-        $this->rest =   new ZUREST($this);
+        $this->rest = new ZUREST($this);
 
 
         $method = strtolower($_SERVER ['REQUEST_METHOD']);
@@ -402,9 +401,9 @@ class ZUFEATURE
 
             $this->values['identifiers'] = array();
             if (is_array($_REQUEST ['ZU_identifier'])) {
-                $restlets = explode('.',$parameter['feature']);
-                foreach($_REQUEST ['ZU_identifier'] as $k => $v){
-                    $this->values['identifiers'][$restlets[$k+3]] = $v;
+                $restlets = explode('.', $parameter['feature']);
+                foreach ($_REQUEST ['ZU_identifier'] as $k => $v) {
+                    $this->values['identifiers'][$restlets[$k + 3]] = $v;
                     $this->values['identifier'] = $v;
                 }
 
@@ -431,10 +430,10 @@ class ZUFEATURE
 
         // comes from mod rewrite
         if (isset ($_REQUEST ['ZU_mimetype'])) {
-            if(is_array($_REQUEST ['ZU_mimetype']) && $_REQUEST ['ZU_mimetype'][0]=='.'){
-                $this->mimetype = substr($_REQUEST ['ZU_mimetype'],1);
-            }else{
 
+            if (is_array($_REQUEST ['ZU_mimetype']) && $_REQUEST ['ZU_mimetype'][0] == '.') {
+                $this->mimetype = substr($_REQUEST ['ZU_mimetype'], 1);
+            } else {
                 $this->mimetype = $_REQUEST ['ZU_mimetype'];
             }
 
@@ -444,10 +443,10 @@ class ZUFEATURE
 
 
         // ist Dokumentation vorhanden, wenn nicht wird dies als nicht implementiert betrachtet
-        if(isset($_REQUEST['ZU_version']) && $_REQUEST['ZU_version']>0){
+        if (isset($_REQUEST['ZU_version']) && $_REQUEST['ZU_version'] > 0) {
             $version = $_REQUEST['ZU_version'] . ".";
             $this->version = $_REQUEST['ZU_version'];
-        }else{
+        } else {
             $version = "";
             $this->version = 0;
         }
@@ -531,7 +530,6 @@ class ZUFEATURE
 
 
             // validate or sanitize
-
             //TODO:: put deep sanitizing here
             //if(is_array($tmp->type)){ZU::print_array($tmp);}
             switch ($tmp->type) {
@@ -676,9 +674,9 @@ class ZUFEATURE
 
         // view in methode abarbeiten
         $this->viewmode = "rest";
-        if(isset($_REQUEST['ZU_version']) && $_REQUEST['ZU_version'] > 1){
+        if (isset($_REQUEST['ZU_version']) && $_REQUEST['ZU_version'] > 1) {
             require ZU_DIR_FEATURE . "{$this->feature}/rest/{$this->view}/{$_REQUEST['ZU_version']}/index.php";
-        }else{
+        } else {
             require ZU_DIR_FEATURE . "{$this->feature}/rest/{$this->view}/index.php";
         }
 
