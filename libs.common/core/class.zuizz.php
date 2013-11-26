@@ -78,7 +78,6 @@ class ZUIZZ
 
     public function init_permissions()
     {
-
         // logout
         if (isset ($_REQUEST ['ZU_logout'])) {
             // Interface und entsprechenden Auth mechanismus aus config laden und verwenden
