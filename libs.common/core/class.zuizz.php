@@ -81,11 +81,17 @@ class ZUIZZ
 
         // logout
         if (isset ($_REQUEST ['ZU_logout'])) {
-            // Interface und entsprechenden Auth mechanismus aus config laden und verwenden
+            // delete all session data
+            $_SESSION = array();
+            //unset session cookie
+            if (ini_get("session.use_cookies")) {
+                $params = session_get_cookie_params();
+                setcookie(session_name(), '', time() - 42000, $params["path"],
+                    $params["domain"], $params["secure"], $params["httponly"]
+                );
+            }
 
-            unset ($_SESSION ['ZUIZZ'] ['AUTH']);
-            unset ($_SESSION ['ZUIZZ'] ['PERM']);
-            unset ($_SESSION ['ZUIZZ'] ['PATH']);
+            session_destroy();
 
         }
 
