@@ -78,7 +78,6 @@ class ZUIZZ
 
     public function init_permissions()
     {
-
         // logout
         if (isset ($_REQUEST ['ZU_logout'])) {
             // Interface und entsprechenden Auth mechanismus aus config laden und verwenden
@@ -88,6 +87,16 @@ class ZUIZZ
             unset ($_SESSION ['ZUIZZ'] ['PATH']);
             unset ($_SESSION ['ZUIZZ'] ['FEATURES']);
             unset ($_SESSION ['ZUIZZ'] ['PERMISSIONSET']);
+
+            //unset session cookie
+            if (ini_get("session.use_cookies")) {
+                $params = session_get_cookie_params();
+                setcookie(session_name(), '', time() - 42000, $params["path"],
+                    $params["domain"], $params["secure"], $params["httponly"]
+                );
+            }
+
+            session_destroy();
 
         }
 
