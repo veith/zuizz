@@ -86,6 +86,8 @@ class ZUIZZ
             unset ($_SESSION ['ZUIZZ'] ['AUTH']);
             unset ($_SESSION ['ZUIZZ'] ['PERM']);
             unset ($_SESSION ['ZUIZZ'] ['PATH']);
+            unset ($_SESSION ['ZUIZZ'] ['FEATURES']);
+            unset ($_SESSION ['ZUIZZ'] ['PERMISSIONSET']);
 
         }
 
