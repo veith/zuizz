@@ -765,10 +765,7 @@ class ZUFEATURE
     function REST_scope(&$ORM)
     {
         $this->rest->scope($ORM);
-
     }
 
 
 }
-
-;

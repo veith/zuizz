@@ -1,12 +1,10 @@
 <?php
 
 class ZUTREE {
-	
-	/**
-	 * Statische funktionen um einen tree abzufragen 
-	 */
-	
-	
-}
 
-?>
+	/**
+	 * Statische funktionen um einen tree abzufragen
+	 */
+
+
+}

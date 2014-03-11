@@ -23,5 +23,3 @@ class dbshema {
 		//TODO - Insert your code here
 	}
 }
-
-?>

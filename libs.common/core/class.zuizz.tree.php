@@ -8,7 +8,7 @@ class tree {
 	 */
 	function __construct($table) {
 		$this->table = $table;
-	
+
 	}
 	/*
 	 * gibt den Pfad als array zurück
@@ -21,7 +21,7 @@ class tree {
 	public function get_path($node, $get_fields = NULL, $join_table = NULL, $join_conditions = NULL) {
 		if ($join_table != NULL) {
 			$join = "LEFT JOIN {$join_table} AS details ON details.node_id = tree.id";
-			
+
 			if ($join_conditions != NULL) {
 				$join .= " AND details.{$join_conditions}";
 			}
@@ -29,7 +29,7 @@ class tree {
 		if (is_array ( $get_fields )) {
 			$fields = implode ( ", details.", $get_fields );
 		}
-		
+
 		$stmt =  ZUDB::prepare ( "SELECT
                 tree.id {$fields}
             FROM
@@ -45,8 +45,8 @@ class tree {
                 tree.lft ASC" );
 		$stmt->bindParam ( ':name', $node );
 		$stmt->execute ();
-	
-	
+
+
 	}
 	/*
 	 * gibt den Pfad als array zurück
@@ -59,7 +59,7 @@ class tree {
 	public function get_children($node, $get_fields = NULL, $join_table = NULL, $join_conditions = NULL) {
 		if ($join_table != NULL) {
 			$join = "LEFT JOIN {$join_table} AS details ON details.node_id = tree.id";
-			
+
 			if ($join_conditions != NULL) {
 				$join .= " AND details.{$join_conditions}";
 			}
@@ -67,7 +67,7 @@ class tree {
 		if (is_array ( $get_fields )) {
 			$fields = implode ( ", details.", $get_fields );
 		}
-		
+
 		$stmt = ZUDB::prepare ( "SELECT
                 tree.id {$fields}
             FROM
@@ -83,8 +83,7 @@ class tree {
                 tree.lft ASC" );
 		$stmt->bindParam ( ':name', $node );
 		$stmt->execute ();
-	
+
 	}
 
 }
-?>

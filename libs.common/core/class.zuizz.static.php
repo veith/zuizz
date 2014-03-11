@@ -341,5 +341,3 @@ class ZU
         return $merged;
     }
 }
-
-?>
